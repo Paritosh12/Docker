@@ -2,54 +2,66 @@ pipeline {
     agent any
 
     environment {
-        DOCKERHUB_USER = "Paritosh Tiwari"   
-        IMAGE_NAME = "todo-cli-123"                  
+        DOCKERHUB_USER = "imt2023123"   
     }
 
     stages {
 
         stage('Checkout Code') {
             steps {
-                git branch: 'main',
-                    url: 'https://github.com/Paritosh12/Docker.git'
+                git branch: 'main', url: 'https://github.com/Paritosh12/Docker.git'
             }
         }
 
         stage('Install Dependencies') {
             steps {
-                sh 'pip install -r requirements.txt'
+                sh '''
+                    python3 -m venv venv
+                    . venv/bin/activate
+                    pip install --upgrade pip
+                    pip install -r requirements.txt
+                '''
             }
         }
 
         stage('Run Tests') {
             steps {
-                sh 'pytest'
+                sh '''
+                    . venv/bin/activate
+                    pytest
+                '''
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                sh "docker build -t ${DOCKERHUB_USER}/${IMAGE_NAME}:latest ."
+                sh '''
+                    docker build -t ${DOCKERHUB_USER}/myapp:latest .
+                '''
             }
         }
 
         stage('Login to Docker Hub') {
             steps {
                 withCredentials([string(credentialsId: 'dockerhub-pass', variable: 'DOCKER_PASS')]) {
-                    sh "echo $DOCKER_PASS | docker login -u ${DOCKERHUB_USER} --password-stdin"
+                    sh '''
+                        echo "$DOCKER_PASS" | docker login -u ${DOCKERHUB_USER} --password-stdin
+                    '''
                 }
             }
         }
 
         stage('Push to Docker Hub') {
             steps {
-                sh "docker push ${DOCKERHUB_USER}/${IMAGE_NAME}:latest"
+                sh '''
+                    docker push ${DOCKERHUB_USER}/myapp:latest
+                '''
             }
         }
 
         stage('Verify Image') {
             steps {
-                sh "docker images"
+                sh 'docker images'
             }
         }
     }
