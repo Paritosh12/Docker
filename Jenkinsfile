@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     environment {
-        DOCKERHUB_USER = "Paritosh Tiwari"   // <-- change this
-        IMAGE_NAME = "todo-cli-123"                  // based on your roll no (123 % 2 = 1)
+        DOCKERHUB_USER = "Paritosh Tiwari"   
+        IMAGE_NAME = "todo-cli-123"                  
     }
 
     stages {
